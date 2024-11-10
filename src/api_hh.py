@@ -1,5 +1,5 @@
 from src.external_api import GetVacanciesAPI, GetEmployersAPI
-from typing import Iterable, Any, Optional
+from typing import Iterable, Any
 import requests
 
 
@@ -19,7 +19,10 @@ class SearchVacanciesHH(GetVacanciesAPI):
             keywords = ""
         self.__params: dict[str, str | int] = {"page": 0, "per_page": 100, "text": keywords}
         if employer_id is not None:
-            self.__params["employer_id"] = employer_id
+            if type(employer_id) is str:
+                self.__params["employer_id"] = employer_id
+            else:
+                raise TypeError("ID работодателя должно быть типа str")
         self.__status_code = None
         self.__vacancies: list[Any] = []
 
@@ -38,7 +41,7 @@ class SearchVacanciesHH(GetVacanciesAPI):
             else:
                 raise AssertionError(f"Неуспешный статус-код: {self.__status_code}")
 
-    def get_vacancies(self) -> Iterable:
+    def get_vacancies(self) -> list[dict[str, Any]]:
         """Метод получения вакансий с HeadHunter.ru"""
         while self.__params.get("page") < 20:
             self._request()
