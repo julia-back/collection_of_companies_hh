@@ -71,26 +71,119 @@ class DBManager:
         finally:
             conn.close()
 
-    def add_foreign_key(self):
-        pass
+    def add_foreign_key(self, table_name: str, column_name: str, other_table: str, other_column: str) -> None:
+        self.__params["database"] = self.db_name
+        conn = psycopg2.connect(**self.__params)
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"ALTER TABLE {table_name} "
+                                f"ADD CONSTRAINT fk_{table_name}_{column_name} "
+                                f"FOREIGN KEY({column_name}) "
+                                f"REFERENCES {other_table}({other_column})")
+        finally:
+            conn.close()
+        self.__params.pop("database", None)
+
+    def get_select(self, select: str):
+        self.__params["database"] = self.db_name
+        conn = psycopg2.connect(**self.__params)
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(select)
+                    data = cur.fetchall()
+        finally:
+            conn.close()
+        self.__params.pop("database", None)
+        return data
 
     def get_companies_and_vacancies_count(self):
         """получает список всех компаний и количество вакансий у каждой компании"""
-        pass
+        self.__params["database"] = self.db_name
+        conn = psycopg2.connect(**self.__params)
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT employers.name, COUNT(*) "
+                                "FROM vacancies "
+                                "RIGHT JOIN employers "
+                                "ON vacancies.employer_id = employers.id "
+                                "GROUP BY employers.name")
+                    data = cur.fetchall()
+        finally:
+            conn.close()
+        self.__params.pop("database", None)
+        return data
 
     def get_all_vacancies(self):
         """получает список всех вакансий с указанием названия компании,
          названия вакансии и зарплаты и ссылки на вакансию"""
-        pass
+        self.__params["database"] = self.db_name
+        conn = psycopg2.connect(**self.__params)
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT employers.name, vacancies.name, salary_from, salary_to, "
+                                "currency, vacancies.url "
+                                "FROM vacancies "
+                                "INNER JOIN employers "
+                                "ON vacancies.employer_id = employers.id")
+                    data = cur.fetchall()
+        finally:
+            conn.close()
+        self.__params.pop("database", None)
+        return data
 
     def get_avg_salary(self):
         """получает среднюю зарплату по вакансиям"""
-        pass
+        self.__params["database"] = self.db_name
+        conn = psycopg2.connect(**self.__params)
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT avg(sal_avg) "
+                                "FROM (SELECT (salary_from + salary_to) / 2 as sal_avg "
+                                "      FROM vacancies "
+                                "      WHERE salary_from <> 0 or salary_to <> 0)")
+                    data = cur.fetchall()
+        finally:
+            conn.close()
+        self.__params.pop("database", None)
+        return data
 
     def get_vacancies_with_higher_salary(self):
         """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям"""
-        pass
+        self.__params["database"] = self.db_name
+        conn = psycopg2.connect(**self.__params)
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT vacancies.*, (salary_from + salary_to) / 2 as sal_avg "
+                                "FROM vacancies "
+                                "WHERE ((salary_from + salary_to) / 2) > "
+                                "	   (SELECT avg(sal_avg)"
+                                "		FROM (SELECT (salary_from + salary_to) / 2 as sal_avg "
+                                "			  FROM vacancies "
+                                "			  WHERE salary_from <> 0 or salary_to <> 0))")
+                    data = cur.fetchall()
+        finally:
+            conn.close()
+        self.__params.pop("database", None)
+        return data
 
-    def get_vacancies_with_keyword(self):
+    def get_vacancies_with_keyword(self, keyword: str):
         """получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python"""
-        pass
+        self.__params["database"] = self.db_name
+        conn = psycopg2.connect(**self.__params)
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute("select * "
+                                "from vacancies "
+                                "where name ilike '%python%' or responsibility ilike '%python%'")
+                    data = cur.fetchall()
+        finally:
+            conn.close()
+        self.__params.pop("database", None)
+        return data
