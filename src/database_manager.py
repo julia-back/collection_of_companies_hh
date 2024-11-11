@@ -92,7 +92,7 @@ class DBManager:
         self.db_name = db_name
         self.__params = get_params_db()
         self.__params["database"] = db_name
-        self.conn = psycopg2.connect(self.__params)
+        self.conn = psycopg2.connect(**self.__params)
 
     def get_select(self, select: str) -> list[tuple[Any, ...]]:
         try:
