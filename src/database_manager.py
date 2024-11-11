@@ -1,7 +1,9 @@
-import psycopg2
-from config import get_params_db
-from typing import Optional, Any
 import re
+from typing import Any, Optional
+
+import psycopg2
+
+from config import get_params_db
 
 
 class DBCreator:

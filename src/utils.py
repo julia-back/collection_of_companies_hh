@@ -1,5 +1,5 @@
-from typing import Iterable, Any
 from re import sub
+from typing import Any
 
 
 def clear_hh_vacancies_by_keys(vacancies_list: list[dict[Any, Any | dict]]) -> list[dict[str, Any]]:

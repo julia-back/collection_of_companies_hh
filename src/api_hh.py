@@ -1,6 +1,8 @@
-from src.external_api import GetVacanciesAPI, GetEmployersAPI
-from typing import Iterable, Any, Optional
+from typing import Any, Optional
+
 import requests
+
+from src.external_api import GetEmployersAPI, GetVacanciesAPI
 
 
 class SearchVacanciesHH(GetVacanciesAPI):
