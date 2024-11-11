@@ -5,12 +5,15 @@ import re
 
 
 class DBCreator:
+    """Класс создания и удаления базы данных, создания и заполнения таблиц"""
 
-    def __init__(self, db_name):
+    def __init__(self, db_name: str) -> None:
+        """Метод инициализации объектов класса"""
         self.db_name = db_name
         self.__params = get_params_db()
 
-    def create_db(self):
+    def create_db(self) -> None:
+        """Метод создания базы данных"""
         conn = psycopg2.connect(**self.__params)
         try:
             conn.autocommit = True
@@ -20,7 +23,8 @@ class DBCreator:
             conn.close()
         print(f"База данных {self.db_name} успешно создана")
 
-    def delete_db(self):
+    def delete_db(self) -> None:
+        """Метод удаления базы данных"""
         conn = psycopg2.connect(**self.__params)
         try:
             conn.autocommit = True
@@ -35,7 +39,9 @@ class DBCreator:
         finally:
             conn.close()
 
-    def create_table(self, table_name: str, columns_dict=None):
+    def create_table(self, table_name: str, columns_dict: Optional = None) -> None:
+        """Метод создания таблицы, принимает название таблицы и словарь с названиями колонок и типами данных,
+        где ключ - название колонки, а значение - тип данных и ограничения колонки по канонам SQL"""
         self.__params["database"] = self.db_name
         conn = psycopg2.connect(**self.__params)
         try:
@@ -53,7 +59,9 @@ class DBCreator:
         self.__params.pop("database", None)
         print(f"Таблица {table_name} успешно создана")
 
-    def insert_into_table_from_json(self, table_name, columns_str: str, json_data: list[dict[str, Any]]):
+    def insert_into_table_from_json(self, table_name: str, columns_str: str, json_data: list[dict[str, Any]]) -> None:
+        """Метод добавления данных в таблицу, принимает название таблицы, строку с перечилением названий
+        колонок, в которые будут добавляться данные, и данные для добавления в формате списка словарей"""
         self.__params["database"] = self.db_name
         conn = psycopg2.connect(**self.__params)
         try:
@@ -72,6 +80,7 @@ class DBCreator:
         self.__params.pop("database", None)
 
     def add_foreign_key(self, table_name: str, column_name: str, other_table: str, other_column: str) -> None:
+        """Метод добавления внешнего ключа таблицы, принимает названия таблиц и колонок для связывания"""
         self.__params["database"] = self.db_name
         conn = psycopg2.connect(**self.__params)
         try:
@@ -87,14 +96,17 @@ class DBCreator:
 
 
 class DBManager:
+    """Класс получения данных из базы данных"""
 
-    def __init__(self, db_name):
+    def __init__(self, db_name: str) -> None:
+        """Метод инициализации объектов класса"""
         self.db_name = db_name
         self.__params = get_params_db()
         self.__params["database"] = db_name
         self.conn = psycopg2.connect(**self.__params)
 
     def get_select(self, select: str) -> list[tuple[Any, ...]]:
+        """Метод для свободного запроса к базе данных"""
         try:
             with self.conn as conn:
                 with conn.cursor() as cur:
@@ -104,8 +116,8 @@ class DBManager:
             pass
         return data
 
-    def get_companies_and_vacancies_count(self):
-        """получает список всех компаний и количество вакансий у каждой компании"""
+    def get_companies_and_vacancies_count(self) -> list[tuple[Any, ...]]:
+        """Метод получения списка всех компаний и количество вакансий у каждой компании"""
         try:
             with self.conn as conn:
                 with conn.cursor() as cur:
@@ -119,8 +131,8 @@ class DBManager:
             pass
         return data
 
-    def get_all_vacancies(self):
-        """получает список всех вакансий с указанием названия компании,
+    def get_all_vacancies(self) -> list[tuple[Any, ...]]:
+        """Метод получения списка всех вакансий с указанием названия компании,
          названия вакансии и зарплаты и ссылки на вакансию"""
         try:
             with self.conn as conn:
@@ -135,8 +147,8 @@ class DBManager:
             pass
         return data
 
-    def get_avg_salary(self):
-        """получает среднюю зарплату по вакансиям"""
+    def get_avg_salary(self) -> list[tuple[Any, ...]]:
+        """Метод получения средней зарплаты по вакансиям"""
         try:
             with self.conn as conn:
                 with conn.cursor() as cur:
@@ -149,8 +161,8 @@ class DBManager:
             pass
         return data
 
-    def get_vacancies_with_higher_salary(self):
-        """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям"""
+    def get_vacancies_with_higher_salary(self) -> list[tuple[Any, ...]]:
+        """Метод получения списка всех вакансий, у которых зарплата выше средней по всем вакансиям"""
         try:
             with self.conn as conn:
                 with conn.cursor() as cur:
@@ -166,8 +178,9 @@ class DBManager:
             pass
         return data
 
-    def get_vacancies_with_keyword(self, keyword: str):
-        """получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python"""
+    def get_vacancies_with_keyword(self, keyword: str) -> list[tuple[Any, ...]]:
+        """Метод получения списка всех вакансий, в названии которых
+        содержатся переданные в метод слова, например python"""
         try:
             with self.conn as conn:
                 with conn.cursor() as cur:

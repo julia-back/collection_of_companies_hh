@@ -2,7 +2,7 @@ from typing import Iterable, Any
 from re import sub
 
 
-def clear_hh_vacancies_by_keys(vacancies_list: Iterable[dict[Any, Any]]) -> list[dict[str, Any]]:
+def clear_hh_vacancies_by_keys(vacancies_list: list[dict[Any, Any | dict]]) -> list[dict[str, Any]]:
     """Функция преобразования вакансий с hh.ru словаря в словарь с нужными данными"""
     clear_vacancies = []
     for vacancy_dict in vacancies_list:
@@ -19,7 +19,8 @@ def clear_hh_vacancies_by_keys(vacancies_list: Iterable[dict[Any, Any]]) -> list
             currency = vacancy_dict.get("salary").get("currency")
         alternate_url = vacancy_dict.get("alternate_url")
         responsibility = vacancy_dict.get("snippet").get("responsibility")
-        responsibility = sub(r"<([a-z]|/)+>", "", responsibility) if responsibility is not None else responsibility
+        responsibility = sub(r"<([a-z]|/)+>", "", responsibility) \
+            if responsibility is not None else responsibility
         experience = vacancy_dict.get("experience").get("name")
         dict_vacancy = {"id_hh": id_, "name": name, "area": area, "salary_from": salary_from,
                         "salary_to": salary_to, "currency": currency,
@@ -29,7 +30,8 @@ def clear_hh_vacancies_by_keys(vacancies_list: Iterable[dict[Any, Any]]) -> list
     return clear_vacancies
 
 
-def clear_hh_employers_by_keys(employers_list: Iterable[dict[Any, Any]]) -> list[dict[str, Any]]:
+def clear_hh_employers_by_keys(employers_list: list[dict[Any, Any]]) -> list[dict[str, Any]]:
+    """Функция преобразования списка словарей работодателей с hh.ru словаря в словарь с нужными данными"""
     clear_list_employers = []
     for employer in employers_list:
         id_ = employer.get("id")
@@ -40,7 +42,8 @@ def clear_hh_employers_by_keys(employers_list: Iterable[dict[Any, Any]]) -> list
     return clear_list_employers
 
 
-def get_my_employers(employers: Iterable[dict[Any, Any]], id_list) -> list[dict[str, Any]]:
+def get_my_employers(employers: list[dict[Any, Any]], id_list) -> list[dict[str, Any]]:
+    """Функция получения определенных работодателей по id с hh.ru"""
     my_employers = []
     for employer in employers:
         if employer.get("id_hh") in id_list:

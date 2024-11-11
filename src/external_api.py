@@ -44,11 +44,14 @@ class GetVacanciesAPI(GetRequestAPI, ABC):
 
 
 class GetEmployersAPI(GetRequestAPI, ABC):
+    """Абстрактный класс Get-запросов на API с информацией о работодателях"""
 
     @abstractmethod
     def _request(self) -> None:
+        """Абстрактный метод Get-запросов на API с информацией о работодателях"""
         pass
 
     @abstractmethod
     def get_employers(self) -> Iterable:
+        """Абстрактный метод получения информации о работодателях (обращается к методу запроса __request)"""
         pass

@@ -1,12 +1,12 @@
 from src.external_api import GetVacanciesAPI, GetEmployersAPI
-from typing import Iterable, Any
+from typing import Iterable, Any, Optional
 import requests
 
 
 class SearchVacanciesHH(GetVacanciesAPI):
     """Класс для Get-запросов на HeadHunter.ru"""
 
-    def __init__(self, keywords=None, employer_id=None) -> None:
+    def __init__(self, keywords: Optional = None, employer_id: Optional = None) -> None:
         """
         Метод инициализации объекта для Get-запросов на HeadHunter.ru,
         принимает ключевые слова для посика вакансий
@@ -50,8 +50,10 @@ class SearchVacanciesHH(GetVacanciesAPI):
 
 
 class SearchEmployersHH(GetEmployersAPI):
+    """Класс запроса к API hh.ru для получения информации по работодателям"""
 
-    def __init__(self, keywords=None, active_vacancies=True):
+    def __init__(self, keywords: Optional = None, active_vacancies: Optional = True) -> None:
+        """Метод инизиализации атрибутов класса"""
         self.__url = "https://api.hh.ru/employers"
         self.__headers = {'User-Agent': 'HH-User-Agent'}
         if keywords is not None and type(keywords) is str:
@@ -63,6 +65,7 @@ class SearchEmployersHH(GetEmployersAPI):
         self.__employers: list[Any] = []
 
     def _request(self) -> None:
+        """Метод запроса к API hh.ru"""
         self.__status_code = None
         try:
             response = requests.get(url=self.__url, headers=self.__headers, params=self.__params)
@@ -74,7 +77,8 @@ class SearchEmployersHH(GetEmployersAPI):
                 new_employers = response.json().get("items")
                 self.__employers.extend(new_employers)
 
-    def get_employers(self) -> Iterable:
+    def get_employers(self) -> list[dict[str, Any]]:
+        """Метод получения информации о работодателях"""
         while self.__params.get("page") < 20:
             self._request()
             self.__params["page"] += 1
