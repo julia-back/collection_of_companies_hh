@@ -29,7 +29,7 @@ def creator():
     for employer in employers:
         id_hh = employer.get("id_hh")
         id_ = (db_get.get_select(f"SELECT id FROM employers WHERE id_hh = '{id_hh}'"))[0][0]
-        vacancies_by_employer = SearchVacanciesHH(employer_id=id_hh).get_vacancies()
+        vacancies_by_employer = SearchVacanciesHH(employer_id=id_hh, page_count=2).get_vacancies()
         vacancies_by_employer = clear_hh_vacancies_by_keys(vacancies_by_employer)
         for vacancy in vacancies_by_employer:
             vacancy["employer_id"] = id_
@@ -39,6 +39,7 @@ def creator():
                                        "experience, employer_id", vacancies_by_employer)
 
     db.add_foreign_key("vacancies", "employer_id", "employers", "id")
+    db_get.close_conn()
     print("Создание базы данных и добавление в нее данных прошло успешно")
 
 

@@ -8,7 +8,7 @@ from src.external_api import GetEmployersAPI, GetVacanciesAPI
 class SearchVacanciesHH(GetVacanciesAPI):
     """Класс для Get-запросов на HeadHunter.ru"""
 
-    def __init__(self, keywords: Optional = None, employer_id: Optional = None) -> None:
+    def __init__(self, keywords: Optional = None, employer_id: Optional = None, page_count: Optional = None) -> None:
         """
         Метод инициализации объекта для Get-запросов на HeadHunter.ru,
         принимает ключевые слова для посика вакансий
@@ -26,6 +26,7 @@ class SearchVacanciesHH(GetVacanciesAPI):
             else:
                 raise TypeError("ID работодателя должно быть типа str")
         self.__status_code = None
+        self.__page_count = page_count if page_count <= 20 else None
         self.__vacancies: list[Any] = []
 
     def _request(self) -> None:
@@ -45,7 +46,7 @@ class SearchVacanciesHH(GetVacanciesAPI):
 
     def get_vacancies(self) -> list[dict[str, Any]]:
         """Метод получения вакансий с HeadHunter.ru"""
-        while self.__params.get("page") < 20:
+        while self.__params.get("page") < self.__page_count:
             self._request()
             self.__params["page"] += 1
         return self.__vacancies
